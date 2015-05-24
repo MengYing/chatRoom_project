@@ -4,7 +4,7 @@ from datetime import datetime
 from . import main
 from ..auth.forms import LoginForm
 from .. import db
-from ..models import Data, User
+from ..models import User
 from ..util import *
 
 

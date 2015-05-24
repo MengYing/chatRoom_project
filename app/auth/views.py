@@ -27,7 +27,7 @@ def login():
         filter_by(email=form.email.data).one()
     session.permanent = True
     session['id'] = sessionid
-    return redirect(url_for('main.label'))
+    return redirect(url_for('main.testpage'))
 
 
 @auth.route('/logout')
@@ -48,9 +48,7 @@ def register():
     user = User(email=form.email.data,
                 username=form.username.data,
                 password=form.password.data,
-                progress=0,
-                start=0,
-                total=1000)
+                status=0)
     db.session.add(user)
     db.session.commit()
     flash('You can now login.')

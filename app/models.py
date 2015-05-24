@@ -3,42 +3,36 @@ from flask.ext.login import UserMixin
 from . import db, login_manager
 
 
-class Data(db.Model):
-    __tablename__ = 'data_attribute'
-    labelTime = db.Column(db.String(256))
-    question = db.Column(db.Integer(10))
-    pictureNum = db.Column(db.String(256))
-    userid = db.Column(db.Integer(10))
-    duration = db.Column(db.Integer(10))
-    answer = db.Column(db.String(256))
+class ConvRecord(db.Model):
+    __tablename__ = 'conv_record'
     id = db.Column(db.Integer(10), primary_key=True, autoincrement=True)
+    chatIndex = db.Column(db.Integer(10))
+    word = db.Column(db.String(256))
+    time = db.Column(db.String(256))
+    fromWho = db.Column(db.String(256))
+    sentimentalVal = db.Column(db.Float(10))
+    retrain = db.Column(db.Integer(1))   
 
-    def __init__(self, labelTime, question, pictureNum, userid, duration, answer):
-        self.labelTime = labelTime
-        self.question = question
-        self.pictureNum = pictureNum
-        self.userid = userid
-        self.duration = duration
-        self.answer = answer
-
+    def __init__(self, word, time, fromWho, sentimentalVal, retrain):
+        self.word = word
+        self.time = time
+        self.fromWho = fromWho
+        self.sentimentalVal = sentimentalVal
+        self.retrain = retrain
+       
     def __repr__(self):
-        return '<Share %r>' % self.labelTime
+        return '<Share %r>' % self.word
 
 
-class Pictures(db.Model):
-    __tablename__ = 'pictures_800'
+class ConvConnect(db.Model):
+    __tablename__ = 'conv_connect'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    pic = db.Column(db.String(20))
-
-
-class Questions(db.Model):
-    __tablename__ = 'question'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    statement = db.Column(db.String(256))
+    users = db.Column(db.String(256))
+    convIndex = db.Column(db.Integer(20))
 
 
 class User(UserMixin, db.Model):
-    __tablename__ = 'user_attribute'
+    __tablename__ = 'user_all'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(64), unique=True, index=True)
     username = db.Column(db.String(64), unique=True, index=True)
@@ -46,9 +40,8 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
     # sessionNum = db.Column(db.Integer(10))
     # picturepool = db.Column(db.String(20000))
-    progress = db.Column(db.Integer(11))
-    total = db.Column(db.Integer(11))
-    start = db.Column(db.Integer(11))
+    
+    status = db.Column(db.Integer(10))
     # question = db.Column(db.Integer(11))
 
     @property
