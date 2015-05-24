@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block page_content %}
+<div id="chat_area" style="width: 500px; height:500px; border:solid 1px black;">	
+	<div class="msg" chat_id="1" position="left" style="height: auto; background-color: rgb(223, 87, 87);">
+		<span style="max_width: 60%;">12345</span>
+	</div>
+	<div class="msg" chat_id="2" position="right" style="height: auto; background-color: rgb(11, 178, 114)">
+		<span style="max_width: 60%">67890</span>
+	</div>
+	<div class="msg" chat_id="3" position="left" style="height: auto; background-color: rgb(223, 228, 58)">
+		<span style="max_width: 60%">asdfg</span>
+	</div>
+</div>
+<div id="input_msg">	// left bottom
+	<button id="submit"></button>
+</div>
+<div id="friend_list">	// right side
+</div>
+<script src="{{ url_for('static', filename='message.js') }}"></script>
+{% endblock %}
