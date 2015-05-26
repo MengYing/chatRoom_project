@@ -73,3 +73,7 @@ def data(pictureNum, duration, answer):
 @main.route('/testpage', methods=['GET'])
 def testpage():
     return render_template('auth/test.html')
+
+@main.route('/chat', methods=['GET'])
+def chat():
+    return render_template('index.html')

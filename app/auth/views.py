@@ -27,7 +27,7 @@ def login():
         filter_by(email=form.email.data).one()
     session.permanent = True
     session['id'] = sessionid
-    return redirect(url_for('main.testpage'))
+    return redirect(url_for('main.chat'))
 
 
 @auth.route('/logout')
