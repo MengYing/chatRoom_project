@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block content_2 %}
-<link rel="stylesheet" href="{{ url_for('static', filename='chatroom.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/chatroom.css') }}">
 <div id="chat_header" align="center">
     <div id="mainpart">
 	<div id="chat_area" align="center">
@@ -18,7 +18,7 @@
 			</span>
 		</div>
 		<div class="msg_container" align="left">
-			<img class="head" src="{{ url_for('static', filename='sample1.jpg') }}">
+			<img class="head" src="{{ url_for('static', filename='images/sample1.jpg') }}">
 			<span class="msg_text" chat_id="23456" position="left" align="left">
 				Hi 你好~
 			</span>
@@ -30,7 +30,7 @@
 		</div>
 		
 		<div class="msg_container" align="left">
-			<img class="head" src="{{ url_for('static', filename='sample1.jpg') }}">
+			<img class="head" src="{{ url_for('static', filename='images/sample1.jpg') }}">
 			<span class="msg_text" chat_id="23460" position="left" align="left" style="background-color: #A8FF55">
 				很高興認識你
 			</span>
@@ -44,119 +44,119 @@
 <div id="friend_list" align="center">
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample2.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample2.jpg') }}">
 		<span class="friend_text" align="left">
 			涵涵
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample3.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample3.jpg') }}">
 		<span class="friend_text" align="left">
 			昀昀
 		</span>
 	</div>
 	<div class="friend_container" style="background-color: #EBEBFF">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample1.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample1.jpg') }}">
 		<span class="friend_text" align="left">
 			彤彤
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample4.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample4.jpg') }}">
 		<span class="friend_text" align="left">
 			子瑄
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample5.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample5.jpg') }}">
 		<span class="friend_text" align="left">
 			妍姊
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample6.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample6.jpg') }}">
 		<span class="friend_text" align="left">
 			欣容
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample7.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample7.jpg') }}">
 		<span class="friend_text" align="left">
 			安安
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample8.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample8.jpg') }}">
 		<span class="friend_text" align="left">
 			蓁蓁
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample_x.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample_x.jpg') }}">
 		<span class="friend_text" align="left">
 			My dear
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample_x.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample_x.jpg') }}">
 		<span class="friend_text" align="left">
 			My dear
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample_x.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample_x.jpg') }}">
 		<span class="friend_text" align="left">
 			My dear
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample_x.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample_x.jpg') }}">
 		<span class="friend_text" align="left">
 			My dear
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample_x.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample_x.jpg') }}">
 		<span class="friend_text" align="left">
 			My dear
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample_x.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample_x.jpg') }}">
 		<span class="friend_text" align="left">
 			My dear
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample_x.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample_x.jpg') }}">
 		<span class="friend_text" align="left">
 			My dear
 		</span>
 	</div>
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
-		<img class="head" src="{{ url_for('static', filename='sample_x.jpg') }}">
+		<img class="head" src="{{ url_for('static', filename='images/sample_x.jpg') }}">
 		<span class="friend_text" align="left">
 			My dear
 		</span>
 	</div>
     </div>
 </div>
-<script src="{{ url_for('static', filename='chatroom.js') }}"></script>
+<script src="{{ url_for('static', filename='javascripts/chatroom.js') }}"></script>
 <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.2.min.js"></script>
 <script>
 	$(document).ready(function(){

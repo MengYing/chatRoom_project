@@ -12,7 +12,7 @@
 {% block page_content %}
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-	<link rel="stylesheet" href="{{ url_for('static', filename='label.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/label.css') }}">
 	<div class="page-header" align="center">
 		<div id="picturearea" align="center">
     			<div id="picframe" align="center" style="width: 80%">
@@ -53,7 +53,7 @@
 			</button>	
 		</div>
 	</div>
-	<script src="{{ url_for('static', filename='label.js') }}"></script>
+	<script src="{{ url_for('static', filename='javascripts/label.js') }}"></script>
 	<script> setpic("{{ pic }}",{{ idx }},{{ ttl }}, "{{ question }}");	</script>
 
 {% endblock %}
