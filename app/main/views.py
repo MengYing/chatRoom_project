@@ -6,6 +6,7 @@ from ..auth.forms import LoginForm
 from .. import db
 from ..models import User
 from ..util import *
+import jieba
 
 
 @main.route('/', methods=['GET', 'POST'])
@@ -70,9 +71,25 @@ def data(pictureNum, duration, answer):
 
     return redirect(url_for('main.newpic'))
 
+
+@main.route('/basePrediction/<stringParam>', methods=['GET'])
+def basePrediction(stringParam):
+    value = 0.0
+    words = jieba.cut(stringParam, cut_all=False)
+    for word in words:
+        if word != '\n':
+            print word
+            if (db.session.query(sentiDictionary.value).filter_by(words=word).first()):
+                value += db.session.query(sentiDictionary.value).filter_by(words=word).first()[0]
+            
+
+    return render_template('end.html', predict=value)
+
+
 @main.route('/testpage', methods=['GET'])
 def testpage():
     return render_template('auth/test.html')
+
 
 @main.route('/chat', methods=['GET'])
 def chat():

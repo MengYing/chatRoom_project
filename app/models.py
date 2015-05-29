@@ -31,6 +31,13 @@ class ConvConnect(db.Model):
     convIndex = db.Column(db.Integer(20))
 
 
+class sentiDictionary(db.Model):
+    __tablename__ = 'sentiDic'
+    dic_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    words = db.Column(db.String(100))
+    value = db.Column(db.Float)
+
+
 class User(UserMixin, db.Model):
     __tablename__ = 'user_all'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
