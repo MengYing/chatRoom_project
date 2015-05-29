@@ -82,7 +82,6 @@ def basePrediction(stringParam):
             if (db.session.query(sentiDictionary.value).filter_by(words=word).first()):
                 value += db.session.query(sentiDictionary.value).filter_by(words=word).first()[0]
             
-
     return render_template('end.html', predict=value)
 
 
