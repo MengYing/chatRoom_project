@@ -3,53 +3,25 @@ from flask.ext.login import UserMixin
 from . import db, login_manager
 
 
-class ConvRecord(db.Model):
-    __tablename__ = 'conv_record'
-    id = db.Column(db.Integer(10), primary_key=True, autoincrement=True)
-    chatIndex = db.Column(db.Integer(10))
-    word = db.Column(db.String(256))
-    time = db.Column(db.String(256))
-    fromWho = db.Column(db.String(256))
-    sentimentalVal = db.Column(db.Float(10))
-    retrain = db.Column(db.Integer(1))   
-
-    def __init__(self, word, time, fromWho, sentimentalVal, retrain):
-        self.word = word
-        self.time = time
-        self.fromWho = fromWho
-        self.sentimentalVal = sentimentalVal
-        self.retrain = retrain
-       
-    def __repr__(self):
-        return '<Share %r>' % self.word
-
-
-class ConvConnect(db.Model):
-    __tablename__ = 'conv_connect'
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    users = db.Column(db.String(256))
-    convIndex = db.Column(db.Integer(20))
-
-
-class sentiDictionary(db.Model):
-    __tablename__ = 'sentiDic'
-    dic_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    words = db.Column(db.String(100))
-    value = db.Column(db.Float)
-
+user_chatroom = db.Table('user_chatrooms',
+        db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
+        db.Column('chatroom_id', db.Integer, db.ForeignKey('chatrooms.id')),
+    )
 
 class User(UserMixin, db.Model):
-    __tablename__ = 'user_all'
+    __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(64), unique=True, index=True)
     username = db.Column(db.String(64), unique=True, index=True)
-    # role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
+    status = db.Column(db.Integer(10))
+    # role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     # sessionNum = db.Column(db.Integer(10))
     # picturepool = db.Column(db.String(20000))
-    
-    status = db.Column(db.Integer(10))
     # question = db.Column(db.Integer(11))
+    chatrooms = db.relationship('Chatroom',secondary = user_chatroom, 
+        backref=db.backref('users', lazy = 'dynamic'))
+    msgs = db.relationship('ChatRecord', backref = 'fromWho', lazy = 'dynamic')
 
     @property
     def password(self):
@@ -65,6 +37,40 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return '<User %r>' % self.username
 
+# record chatroom's memeber
+class Chatroom(db.Model):
+    __tablename__ = 'chatrooms'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    created_at = db.Column(db.DateTime)
+
+    def __init__(self, created_at):
+        self.created_at = created_at
+
+class ChatRecord(db.Model):
+    __tablename__ = 'chat_records'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    chatroom_id = db.Column(db.Integer,db.ForeignKey('chatrooms.id'))
+    user_id = db.Column(db.Integer,db.ForeignKey('users.id'))
+    word = db.Column(db.String(256))
+    sentimentalVal = db.Column(db.Float(10))
+    retrain = db.Column(db.Boolean)   
+    created_at = db.Column(db.DateTime)
+
+    def __init__(self, word, time, fromWho, sentimentalVal, retrain=True):
+        self.word = word
+        self.time = time
+        self.fromWho = fromWho
+        self.sentimentalVal = sentimentalVal
+        self.retrain = retrain
+       
+    def __repr__(self):
+        return '<Share %r>' % self.word
+
+class sentiDictionary(db.Model):
+    __tablename__ = 'sentiDic'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    words = db.Column(db.String(100))
+    value = db.Column(db.Float)
 
 @login_manager.user_loader
 def load_user(user_id):
