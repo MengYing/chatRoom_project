@@ -9,18 +9,27 @@ var msg_controller = new function(){
 				});
 			});
 		},
-		addMessage : function(converse_id,str,direction,point){
-			var color = getColor(point);
-			var output = getMessageDiv(str,color,direction,converse_id);
-			$('#chat_area').append(output);
-			$('.msg[chat_id="' + converse_id + '"]').bind("click",function(){
-				showBar($(this));
-			});
+		enterMessage : function(event){
+			if(event.keyCode == 13){
+				var str = $("#input_msg").val();
+				var room = parseInt($("#chat_header").attr("room_id"));
+				$.post("/chat/"+str, {room:room})
+					.done(function(data){
+						var direction = "left";
+						var converse_id = data.record_id;
+						var score = data.score;
+						addMessage(converse_id,str,direction,score);
+						$("#input_msg").val("");
+					})
+					.fail(function(){
+						alert('fail to submit the message!');
+					});
+			}
 		},
 		updateMsgColor : function(converse_id,point){
 			var color = getColor(point);
 			var div = $(".msg[chat_id='" + converse_id + "']");
-			$(div).css("color",color)
+			$(div).css("color",color);
 		},
 		modifyMsgColor : function(){
 			//user modify the color => post to server
@@ -34,20 +43,31 @@ var msg_controller = new function(){
 	function getColor(point){
 		return "red"
 	}
+
+	function addMessage(converse_id,str,direction,point){
+		var color = getColor(point);
+		var output = getMessageDiv(str,color,direction,converse_id);
+		$('#chat_area').append(output);
+		$('.msg[chat_id="' + converse_id + '"]').bind("click",function(){
+			showBar($(this));
+		});
+	}
+
 	//handle the block:msg
 	function getMessageDiv(str,color,direction,converse_id){
-		var div = '<div></div>';
-		var style = {"height":"auto", "background-color":"green", "color":"red"};
-		var attr = {"chat_id":converse_id, "position":direction};
-		div = $(div).addClass("msg").attr(attr).css(style);
-		return setMessageContent(div,str);
+		var div = '<div class="msg_container" align="' + direction + '" chat_id ="' + converse_id +'">';
+		var img = '<img src="static/images/sample1.jpg" class="head">';
+		var span = setMessageContent(direction,str);
+		if(direction == "left")
+			div = $(div).append(img).append(span);
+		else
+			div = $(div).append(span);
+		return div;
 	}
 	//handle elements in block:msg
-	function setMessageContent(div,str){
-		var span = '<span>' + str + '</span>';
-		span = $(span).addClass("msg_content");
-		var block = panelUserSetPoint();
-		return $(div).append(span).append(block);
+	function setMessageContent(direction,str){
+		var span = '<span class="msg_text" position="' + direction + '" align="left"></span>'
+		return $(span).text(str);
 	}
 	function showBar(obj){
 		$(obj).children(".msg_color_set").show();

@@ -103,5 +103,14 @@ def index():
 
 @main.route('/chat/<msg>', methods = ['GET','POST'])
 def chat(msg):
-    a = "123"
-    return jsonify({'a':a})
+    u_id = session.get('id')[0]
+    room_id = request.form["room"]
+    record = ChatRecord(msg,u_id,room_id)
+    db.session.add(record)
+    db.session.commit()
+    return jsonify({"success":True})
+
+@main.route('/modify_value/<id>', methods = ['POST'])
+def modify_value(id):
+    val = request.form["score"]
+    ChatRecord.update_value(id,val)
