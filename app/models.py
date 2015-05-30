@@ -1,6 +1,8 @@
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask.ext.login import UserMixin
 from . import db, login_manager
+import jieba
+from datetime import datetime
 
 
 user_chatroom = db.Table('user_chatrooms',
@@ -22,6 +24,16 @@ class User(UserMixin, db.Model):
     chatrooms = db.relationship('Chatroom',secondary = user_chatroom, 
         backref=db.backref('users', lazy = 'dynamic'))
     msgs = db.relationship('ChatRecord', backref = 'fromWho', lazy = 'dynamic')
+
+    # add user_chat: (user, room)
+    def join_room(self,room_id):
+        room = Chatroom.query.get(room_id)
+        if room == None:
+            return None
+        else:
+            self.chatrooms.append(room)
+            db.session.commit()
+        return self
 
     @property
     def password(self):
@@ -53,24 +65,44 @@ class ChatRecord(db.Model):
     user_id = db.Column(db.Integer,db.ForeignKey('users.id'))
     word = db.Column(db.String(256))
     sentimentalVal = db.Column(db.Float(10))
-    retrain = db.Column(db.Boolean)   
+    retrained = db.Column(db.Boolean)   
     created_at = db.Column(db.DateTime)
 
-    def __init__(self, word, time, fromWho, sentimentalVal, retrain=True):
+    def __init__(self, word, user_id, chatroom_id, retrained=False):
+        self.chatroom_id = chatroom_id
+        self.user_id = user_id
         self.word = word
-        self.time = time
-        self.fromWho = fromWho
-        self.sentimentalVal = sentimentalVal
-        self.retrain = retrain
-       
+        self.sentimentalVal = SentiDictionary.get_value(word)
+        self.retrained = retrained
+        self.created_at = datetime.utcnow()
+
     def __repr__(self):
         return '<Share %r>' % self.word
 
-class sentiDictionary(db.Model):
+    @staticmethod
+    def update_value(record_id, new_value):
+        record = db.query(ChatRecord.sentimentalVal,ChatRecord.retrained).get(record_id)
+        record.sentimentalVal = new_value
+        record.retrained = True
+        db.session.commit()
+
+
+class SentiDictionary(db.Model):
     __tablename__ = 'sentiDic'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     words = db.Column(db.String(100))
     value = db.Column(db.Float)
+
+    @staticmethod
+    def get_value(stringParam):
+        value = 0.0
+        words = jieba.cut(stringParam, cut_all=False)
+        for word in words:
+            if word != '\n':
+                result = db.session.query(SentiDictionary.value).filter_by(words=word).first()
+                if (result):
+                    value += result[0]
+        return value
 
 @login_manager.user_loader
 def load_user(user_id):

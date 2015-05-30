@@ -22,7 +22,7 @@ function send(words){
 	
 	if(direc == 'left'){
 		head = document.createElement('img');
-		head.setAttribute("src", "static/sample1.jpg");
+		head.setAttribute("src", "static/images/sample1.jpg");
 		head.setAttribute("class", "head");
 		container.appendChild(head);
 	}
