@@ -9,7 +9,10 @@
 
 {% block content_2 %}
 <link rel="stylesheet" href="{{ url_for('static', filename='stylesheets/chatroom.css') }}">
-<div id="chat_header" align="center">
+
+<!-- Chatroom Body -->
+
+<div id="chat_header" align="center" room_id = "1">
     <div id="mainpart">
 	<div id="chat_area" align="center">
 		<div class="msg_container" align="center">
@@ -20,7 +23,7 @@
 		<div class="msg_container" align="left">
 			<img class="head" src="{{ url_for('static', filename='images/sample1.jpg') }}">
 			<span class="msg_text" chat_id="23456" position="left" align="left">
-				Hi 你好~
+				{{name}}
 			</span>
 		</div>
 		<div class="msg_container" align="right">
@@ -31,16 +34,20 @@
 		
 		<div class="msg_container" align="left">
 			<img class="head" src="{{ url_for('static', filename='images/sample1.jpg') }}">
-			<span class="msg_text" chat_id="23460" position="left" align="left" style="background-color: #A8FF55">
+			<span class="msg_text" chat_id="23460" position="left" align="left">
 				很高興認識你
 			</span>
 		</div>
 		
 	</div>
+
 	<div id="input_msg_container" align="center">
-		<input type="text" placeholder="Please type your msg here and press 'enter' " id="input_msg" onkeypress="check(event);" autofocus></input>
+		<input type="text" placeholder="Please type your msg here and press 'enter' " id="input_msg" onkeypress="msg_controller.enterMessage(event);" autofocus></input>
 	</div>
 </div>
+
+<!-- FRIEND LIST -->
+
 <div id="friend_list" align="center">
 	<div class="friend_container" onmouseover="light(this);" onmouseout="unlight(this);">
 		<div class="floater"></div>
@@ -156,11 +163,14 @@
 	</div>
     </div>
 </div>
-<script src="{{ url_for('static', filename='javascripts/chatroom.js') }}"></script>
 <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.2.min.js"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='javascripts/chatroom.js') }}"></script>
+<script src="{{ url_for('static', filename='javascripts/message.js') }}"></script>
 <script>
 	$(document).ready(function(){
 		console.log('ready');
+		msg_controller.init();
 		//window.scrollTo(0,document.body.scrollHeight);
 		//mainpart = document.getElementById('mainpart');
 		//mainpart.scrollTo(0, mainpart.scrollHeight);

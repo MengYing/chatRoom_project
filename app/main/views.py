@@ -9,9 +9,9 @@ from ..util import *
 import jieba
 
 
-@main.route('/', methods=['GET', 'POST'])
-def index():
-    return redirect(url_for('auth.login'))
+# @main.route('/', methods=['GET', 'POST'])
+# def indextest():
+#     return redirect(url_for('auth.login'))
 
 
 @main.route('/label', methods=['GET'])
@@ -79,8 +79,8 @@ def basePrediction(stringParam):
     for word in words:
         if word != '\n':
             print word
-            if (db.session.query(sentiDictionary.value).filter_by(words=word).first()):
-                value += db.session.query(sentiDictionary.value).filter_by(words=word).first()[0]
+            if (db.session.query(SentiDictionary.value).filter_by(words=word).first()):
+                value += db.session.query(SentiDictionary.value).filter_by(words=word).first()[0]
             
     return render_template('end.html', predict=value)
 
@@ -89,7 +89,29 @@ def basePrediction(stringParam):
 def testpage():
     return render_template('auth/test.html')
 
+@main.route('/', methods=['GET', 'POST'])
+@main.route('/chatroom', methods=['GET'])
+def index():
+    user = User.query.get(1)
+    # name = user.username
+    # print user.join_room(2)
+    # print "point: " + str(sentiDictionary.get_value("test1"))
+    # record = ChatRecord("test1",1,1)
+    # db.session.add(record)
+    # db.session.commit()
+    return render_template('index.html',name = user)
 
-@main.route('/chat', methods=['GET'])
-def chat():
-    return render_template('index.html')
+@main.route('/chat/<msg>', methods = ['GET','POST'])
+def chat(msg):
+    u_id = session.get('id')[0]
+    room_id = request.form["room"]
+    record = ChatRecord(msg,u_id,room_id)
+    score = SentiDictionary.get_value(msg)
+    db.session.add(record)
+    db.session.commit()
+    return jsonify({"success":True,"chat_id":record.id,"score":score})
+
+@main.route('/modify_value/<id>', methods = ['POST'])
+def modify_value(id):
+    val = request.form["score"]
+    ChatRecord.update_value(id,val)
