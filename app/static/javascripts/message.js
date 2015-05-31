@@ -7,7 +7,6 @@ var msg_controller = new function(){
 	return thisObj = {
 		init : function(){
 			loginWebsocket();
-			setSocketEvent();
 			$(".msg").each(function(){
 				$(this).bind("click",function(){
 					showBar($(this));
