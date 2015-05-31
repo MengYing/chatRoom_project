@@ -163,12 +163,14 @@
 	</div>
     </div>
 </div>
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.2.min.js"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
 <script src="{{ url_for('static', filename='javascripts/chatroom.js') }}"></script>
 <script src="{{ url_for('static', filename='javascripts/message.js') }}"></script>
-<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.11.2.min.js"></script>
 <script>
 	$(document).ready(function(){
 		console.log('ready');
+		msg_controller.init();
 		//window.scrollTo(0,document.body.scrollHeight);
 		//mainpart = document.getElementById('mainpart');
 		//mainpart.scrollTo(0, mainpart.scrollHeight);

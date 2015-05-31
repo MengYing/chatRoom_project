@@ -106,9 +106,10 @@ def chat(msg):
     u_id = session.get('id')[0]
     room_id = request.form["room"]
     record = ChatRecord(msg,u_id,room_id)
+    score = SentiDictionary.get_value(msg)
     db.session.add(record)
     db.session.commit()
-    return jsonify({"success":True})
+    return jsonify({"success":True,"chat_id":record.id,"score":score})
 
 @main.route('/modify_value/<id>', methods = ['POST'])
 def modify_value(id):
