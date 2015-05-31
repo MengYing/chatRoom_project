@@ -54,9 +54,11 @@ class Chatroom(db.Model):
     __tablename__ = 'chatrooms'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime)
+    full = db.Column(db.Boolean)
 
-    def __init__(self, created_at):
-        self.created_at = created_at
+    def __init__(self):
+        self.created_at = datetime.utcnow()
+        self.full = False
 
 class ChatRecord(db.Model):
     __tablename__ = 'chat_records'
@@ -68,7 +70,7 @@ class ChatRecord(db.Model):
     retrained = db.Column(db.Boolean)   
     created_at = db.Column(db.DateTime)
 
-    def __init__(self, word, user_id, chatroom_id, retrained=False):
+    def __init__(self, word, user_id, chatroom_id, retrained=True):
         self.chatroom_id = chatroom_id
         self.user_id = user_id
         self.word = word
@@ -81,9 +83,9 @@ class ChatRecord(db.Model):
 
     @staticmethod
     def update_value(record_id, new_value):
-        record = db.query(ChatRecord.sentimentalVal,ChatRecord.retrained).get(record_id)
+        record = ChatRecord.query.get(record_id)
         record.sentimentalVal = new_value
-        record.retrained = True
+        record.retrained = False
         db.session.commit()
 
 

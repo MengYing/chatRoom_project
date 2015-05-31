@@ -7,7 +7,7 @@ var msg_controller = new function(){
 	return thisObj = {
 		init : function(){
 			loginWebsocket();
-			$(".msg").each(function(){
+			$(".msg_text").each(function(){
 				$(this).bind("click",function(){
 					showBar($(this));
 				});
@@ -16,7 +16,6 @@ var msg_controller = new function(){
 		enterMessage : function(event){
 			if(event.keyCode == 13){
 				var str = $("#input_msg").val();
-				var room = parseInt($("#chat_header").attr("room_id"));
 				$.post("/chat/"+str, {room:room})
 					.done(function(data){
 						var direction = "right";
@@ -32,10 +31,14 @@ var msg_controller = new function(){
 					});
 			}
 		},
-		updateMsgColor : function(converse_id,point){
-			var color = getColor(point);
-			var div = $(".msg[chat_id='" + converse_id + "']");
-			$(div).css("color",color);
+		updateMsgColor : function(chat_id,score){
+			$.post("/modify_value/" + chat_id, {score:score})
+			.done(function(data){
+				$(".msg_container[chat_id='"+chat_id+"']").children(".msg_text").css("color",setEmotion(score));
+			})
+			.fail(function(){
+				alert("update failed!");
+			});
 		},
 		modifyMsgColor : function(){
 			//user modify the color => post to server
@@ -52,38 +55,71 @@ var msg_controller = new function(){
 
 	function addMessage(converse_id,str,direction,point){
 		var color = getColor(point);
-		var output = getMessageDiv(str,color,direction,converse_id);
+		var output = getMessageDiv(str,color,direction,converse_id,point);
 		$('#chat_area').append(output);
-		$('.msg[chat_id="' + converse_id + '"]').bind("click",function(){
+		$('.msg_container[chat_id="' + converse_id + '"]').children(".msg_text").bind("click",function(){
 			showBar($(this));
 		});
 	}
 
 	//handle the block:msg
-	function getMessageDiv(str,color,direction,converse_id){
+	function getMessageDiv(str,color,direction,converse_id,point){
 		var div = '<div class="msg_container" align="' + direction + '" chat_id ="' + converse_id +'">';
 		var img = '<img src="static/images/sample1.jpg" class="head">';
-		var span = setMessageContent(direction,str);
+		var span = setMessageContent(direction,str,point);
+		var color_bar = setColorBar(direction,converse_id);
 		if(direction == "left")
 			div = $(div).append(img).append(span);
 		else
-			div = $(div).append(span);
+			div = $(div).append(span).append(color_bar);
 		return div;
 	}
 	//handle elements in block:msg
-	function setMessageContent(direction,str){
+	function setMessageContent(direction,str,point){
 		var span = '<span class="msg_text" position="' + direction + '" align="left"></span>'
-		return $(span).text(str);
+		return $(span).text(str).css("color",setEmotion(point));
+	}
+	function setEmotion(point){
+		var color_list = ["#FF2904","#FAF704","#5DFA05","#64FAF5","#0F1EFA"];
+		var color;
+		point = parseFloat(point);
+		// console.log("point: " + point);
+		if(point >= 0.6)
+			color = color_list[0];
+		else if(point >= 0.2)
+			color = color_list[1];
+		else if(point >= -0.2)
+			color = color_list[2];
+		else if(point >= -0.6)
+			color = color_list[3];
+		else
+			color = color_list[4];
+
+		return color;
+	}
+	function setColorBar(direction,chat_id){
+		var block = '<div position="' + direction + '"></div>';
+		var span = '<span></span>'
+		var emotion = {"happy":0.7, "scared":0.4, "none":0.1, "mad":-0.4, "sad":-0.7};
+		
+		for(var key in emotion){
+			var onclick = "msg_controller.updateMsgColor('" + chat_id + "','" + emotion[key] + "')";
+			var tmp = $(span).text(key).css({"margin":"0px 10px","cursor":"pointer"}).attr("onclick",onclick);
+			block = $(block).append(tmp);
+		}
+
+		block = $(block).addClass("msg_color_set").css("display","none");
+		return block
 	}
 	function showBar(obj){
-		$(obj).children(".msg_color_set").show();
+		$(obj).siblings(".msg_color_set").show();
 		$(obj).unbind("click");
 		$(obj).bind("click",function(){
 			hideBar($(obj));
 		});
 	}
 	function hideBar(obj){
-		$(obj).children(".msg_color_set").hide();
+		$(obj).siblings(".msg_color_set").hide();
 		$(obj).unbind("click");
 		$(obj).bind("click",function(){
 			showBar($(obj));
@@ -95,10 +131,12 @@ var msg_controller = new function(){
 		return block
 	}
 	function loginWebsocket(){
-		console.log("connect to websocket");
+		console.log("Start connecting to websocket");
+		u_id = $('#chat_header').attr("u_id");
+		room = $('#chat_header').attr("room_id");
 		socket = io.connect('http://127.0.0.1:5000/');
 		socket.on('connect', function() {
-            socket.emit('join room', {room: 1});
+            socket.emit('join room', {room: room, u_id:u_id});
         });
 		socket.on('set room', function(data) {
             room = data.room;
@@ -108,10 +146,11 @@ var msg_controller = new function(){
         setSocketEvent();
 	}
 	function setSocketEvent(){
+		console.log("setSocketEvent");
 		socket.on('set msg', function(data) {
-			console.log(data)
+			console.log(data);
 			if(data.sender != sender_id)
-            	addMessage(data.id,data.msg,"left",data.score)
+            	addMessage(data.chat_id,data.msg,"left",data.score);
         });
 	}
 };

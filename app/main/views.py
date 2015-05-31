@@ -13,7 +13,6 @@ import jieba
 # def indextest():
 #     return redirect(url_for('auth.login'))
 
-
 @main.route('/label', methods=['GET'])
 def label():
     print "enter main.label"
@@ -92,14 +91,25 @@ def testpage():
 @main.route('/', methods=['GET', 'POST'])
 @main.route('/chatroom', methods=['GET'])
 def index():
-    user = User.query.get(1)
+    user = User.query.filter_by(id=session.get('id')[0]).first()
+    chatroom = Chatroom.query.filter_by(full=False).first()
+    if not chatroom:
+        chatroom = Chatroom()
+        db.session.add(chatroom)
+        db.session.commit()
+    else:
+        chatroom.full = True
+
+    user.join_room(chatroom.id)
+    db.session.commit()
+    
     # name = user.username
     # print user.join_room(2)
     # print "point: " + str(sentiDictionary.get_value("test1"))
     # record = ChatRecord("test1",1,1)
     # db.session.add(record)
     # db.session.commit()
-    return render_template('index.html',name = user)
+    return render_template('index.html',u_id = user.id, room_id = chatroom.id)
 
 @main.route('/chat/<msg>', methods = ['GET','POST'])
 def chat(msg):
@@ -113,5 +123,7 @@ def chat(msg):
 
 @main.route('/modify_value/<id>', methods = ['POST'])
 def modify_value(id):
-    val = request.form["score"]
+    id = int(id)
+    val = float(request.form["score"])
     ChatRecord.update_value(id,val)
+    return jsonify({"msg":"update success"})
