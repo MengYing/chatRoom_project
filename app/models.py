@@ -54,9 +54,11 @@ class Chatroom(db.Model):
     __tablename__ = 'chatrooms'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime)
+    full = db.Column(db.Boolean)
 
-    def __init__(self, created_at):
-        self.created_at = created_at
+    def __init__(self):
+        self.created_at = datetime.utcnow()
+        self.full = False
 
 class ChatRecord(db.Model):
     __tablename__ = 'chat_records'

@@ -16,7 +16,6 @@ var msg_controller = new function(){
 		enterMessage : function(event){
 			if(event.keyCode == 13){
 				var str = $("#input_msg").val();
-				var room = parseInt($("#chat_header").attr("room_id"));
 				$.post("/chat/"+str, {room:room})
 					.done(function(data){
 						var direction = "right";
@@ -95,10 +94,12 @@ var msg_controller = new function(){
 		return block
 	}
 	function loginWebsocket(){
-		console.log("connect to websocket");
+		console.log("Start connecting to websocket");
+		u_id = $('#chat_header').attr("u_id");
+		room = $('#chat_header').attr("room_id");
 		socket = io.connect('http://127.0.0.1:5000/');
 		socket.on('connect', function() {
-            socket.emit('join room', {room: 1});
+            socket.emit('join room', {room: room, u_id:u_id});
         });
 		socket.on('set room', function(data) {
             room = data.room;
@@ -108,6 +109,7 @@ var msg_controller = new function(){
         setSocketEvent();
 	}
 	function setSocketEvent(){
+		console.log("setSocketEvent");
 		socket.on('set msg', function(data) {
 			console.log(data)
 			if(data.sender != sender_id)
