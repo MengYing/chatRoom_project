@@ -123,5 +123,7 @@ def chat(msg):
 
 @main.route('/modify_value/<id>', methods = ['POST'])
 def modify_value(id):
-    val = request.form["score"]
+    id = int(id)
+    val = float(request.form["score"])
     ChatRecord.update_value(id,val)
+    return jsonify({"msg":"update success"})
