@@ -91,7 +91,11 @@ def testpage():
 @main.route('/', methods=['GET', 'POST'])
 @main.route('/chatroom', methods=['GET'])
 def index():
-    user = User.query.filter_by(id=session.get('id')[0]).first()
+    try:
+        user = User.query.filter_by(id=session.get('id')[0]).first()
+    except:
+        return redirect(url_for('auth.login'))
+        
     chatroom = Chatroom.query.filter_by(full=False).first()
     if not chatroom:
         chatroom = Chatroom()
