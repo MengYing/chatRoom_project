@@ -22,11 +22,24 @@ def login():
         return render_template('auth/login.html', form=form)
 
     print "already pass"
+
     login_user(user, form.remember_me.data)
-    sessionid = db.session.query(User.id).\
-        filter_by(email=form.email.data).one()
-    session.permanent = True
-    session['id'] = sessionid
+    
+    chatroom = Chatroom.query.filter_by(full=False).first()
+    if not chatroom:
+        chatroom = Chatroom()
+        db.session.add(chatroom)
+        db.session.commit()
+    else:
+        chatroom.full = True
+
+    user.join_room(chatroom.id)
+    db.session.commit()
+
+    session.permanent = False
+    session['id'] = user.id
+    session['chatroom_id'] = chatroom.id
+    
     return redirect(url_for('main.index'))
 
 
@@ -35,8 +48,9 @@ def login():
 def logout():
     logout_user()
     session.clear()
+    form = LoginForm()
     flash('You have been logged out.')
-    return redirect(url_for('main.index'))
+    return render_template('auth/login.html', form=form)
 
 
 @auth.route('/register', methods=['GET', 'POST'])

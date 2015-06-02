@@ -91,29 +91,13 @@ def testpage():
 @main.route('/', methods=['GET', 'POST'])
 @main.route('/chatroom', methods=['GET'])
 def index():
-    user = User.query.filter_by(id=session.get('id')[0]).first()
-    chatroom = Chatroom.query.filter_by(full=False).first()
-    if not chatroom:
-        chatroom = Chatroom()
-        db.session.add(chatroom)
-        db.session.commit()
-    else:
-        chatroom.full = True
-
-    user.join_room(chatroom.id)
-    db.session.commit()
-    
-    # name = user.username
-    # print user.join_room(2)
-    # print "point: " + str(sentiDictionary.get_value("test1"))
-    # record = ChatRecord("test1",1,1)
-    # db.session.add(record)
-    # db.session.commit()
-    return render_template('index.html',u_id = user.id, room_id = chatroom.id)
+    u_id = session.get('id')
+    room_id = session.get('chatroom_id')
+    return render_template('index.html',u_id = u_id, room_id = room_id )
 
 @main.route('/chat/<msg>', methods = ['GET','POST'])
 def chat(msg):
-    u_id = session.get('id')[0]
+    u_id = session.get('id')
     room_id = request.form["room"]
     record = ChatRecord(msg,u_id,room_id)
     score = SentiDictionary.get_value(msg)
