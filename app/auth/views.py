@@ -50,7 +50,9 @@ def logout():
     session.clear()
     form = LoginForm()
     flash('You have been logged out.')
-    return render_template('auth/login.html', form=form)
+    # return render_template('auth/login.html', form=form)
+    return redirect(url_for('auth.login'))
+
 
 
 @auth.route('/register', methods=['GET', 'POST'])
