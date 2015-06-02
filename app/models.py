@@ -21,9 +21,8 @@ class User(UserMixin, db.Model):
     # sessionNum = db.Column(db.Integer(10))
     # picturepool = db.Column(db.String(20000))
     # question = db.Column(db.Integer(11))
-    chatrooms = db.relationship('Chatroom',secondary = user_chatroom, 
-        backref=db.backref('users', lazy = 'dynamic'))
-    msgs = db.relationship('ChatRecord', backref = 'fromWho', lazy = 'dynamic')
+    chatrooms = db.relationship('Chatroom',secondary = user_chatroom, backref=db.backref('users'))
+    msgs = db.relationship('ChatRecord', backref = 'fromWho')
 
     # add user_chat: (user, room)
     def join_room(self,room_id):

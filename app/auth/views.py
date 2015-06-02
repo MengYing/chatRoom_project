@@ -11,6 +11,7 @@ from ..util import *
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    # login 
     form = LoginForm()
     if not form.validate_on_submit():
         return render_template('auth/login.html', form=form)
@@ -20,16 +21,22 @@ def login():
         flash('Invalid username or password.')
         print "not pass"
         return render_template('auth/login.html', form=form)
-
     print "already pass"
-
     login_user(user, form.remember_me.data)
     
+    # appoint room
     chatroom = Chatroom.query.filter_by(full=False).first()
     if not chatroom:
         chatroom = Chatroom()
         db.session.add(chatroom)
         db.session.commit()
+    elif chatroom.full == False:
+        def get_id(x): return x.id
+        room_users = map(get_id,chatroom.users)
+        if user.id in room_users:
+            chatroom = Chatroom()
+            db.session.add(chatroom)
+            db.session.commit()
     else:
         chatroom.full = True
 
