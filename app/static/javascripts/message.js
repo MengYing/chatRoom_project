@@ -3,6 +3,7 @@ var msg_controller = new function(){
 	var room = '';
 	var sender_id;
 	var socket;
+	var start_talk;
 	//TODO: bind click event
 	return thisObj = {
 		init : function(){
@@ -12,6 +13,7 @@ var msg_controller = new function(){
 					showBar($(this));
 				});
 			});
+			start_talk = parseInt($(".msg_title").attr("start_talk"));
 		},
 		enterMessage : function(event){
 			if(event.keyCode == 13){
@@ -24,7 +26,7 @@ var msg_controller = new function(){
 						addMessage(chat_id,str,direction,score);
 						$("#input_msg").val("");
 						//send msg to other one
-						socket.emit("set msg",{sender: sender_id, room:room, chat_id:chat_id, msg:str, score:score})
+						socket.emit("set msg",{sender: sender_id, room:room, chat_id:chat_id, msg:str, score:score});
 					})
 					.fail(function(){
 						alert('fail to submit the message!');
@@ -35,6 +37,7 @@ var msg_controller = new function(){
 			$.post("/modify_value/" + chat_id, {score:score})
 			.done(function(data){
 				$(".msg_container[chat_id='"+chat_id+"']").children(".msg_text").css("color",setEmotion(score));
+				socket.emit("update color",{sender: sender_id, room:room, chat_id:parseInt(chat_id), score:score});
 			})
 			.fail(function(){
 				alert("update failed!");
@@ -80,7 +83,7 @@ var msg_controller = new function(){
 		return $(span).text(str).css("color",setEmotion(point));
 	}
 	function setEmotion(point){
-		var color_list = ["#FF2904","#FAF704","#5DFA05","#64FAF5","#0F1EFA"];
+		var color_list = ["#FF2904","#FAF704","#000000","#64FAF5","#0F1EFA"];
 		var color;
 		point = parseFloat(point);
 		// console.log("point: " + point);
@@ -151,9 +154,21 @@ var msg_controller = new function(){
 			console.log(data);
 			if(data.sender != sender_id)
             	addMessage(data.chat_id,data.msg,"left",data.score);
+            if(start_talk == 0){
+            	start_talk = 1 ;
+            	$(".msg_title").text("已連線，請開始聊天...");
+            }
+        });
+
+        socket.on('update color', function(data) {
+        	console.log(data);
+        	if(data.sender != sender_id){
+        		$(".msg_container[chat_id='" + data.chat_id + "'] .msg_text").css("color",setEmotion(data.score));
+        	}
+        });
+        
+		socket.on('start talk', function(data) {
+        	
         });
 	}
 };
-function testsocket(){
-	socket.emit('my event', {data: "123456"});
-}

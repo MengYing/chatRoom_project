@@ -8,7 +8,7 @@ from .. import db
 from ..models import User
 from ..util import *
 
-
+@auth.route('/', methods=['GET', 'POST'])
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     # login 
@@ -29,6 +29,7 @@ def login():
     if not chatroom:
         chatroom = Chatroom()
         db.session.add(chatroom)
+        db.session.commit()
         user.join_room(chatroom.id)
         db.session.commit()
     else:

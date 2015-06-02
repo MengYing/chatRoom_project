@@ -88,12 +88,14 @@ def basePrediction(stringParam):
 def testpage():
     return render_template('auth/test.html')
 
-@main.route('/', methods=['GET', 'POST'])
+
 @main.route('/chatroom', methods=['GET'])
 def index():
     u_id = session.get('id')
     room_id = session.get('chatroom_id')
-    return render_template('index.html',u_id = u_id, room_id = room_id )
+    full = Chatroom.query.get(session.get('chatroom_id')).full
+    print full
+    return render_template('index.html',u_id = u_id, room_id = room_id, full = full )
 
 @main.route('/chat/<msg>', methods = ['GET','POST'])
 def chat(msg):

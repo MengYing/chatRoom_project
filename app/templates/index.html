@@ -16,29 +16,16 @@
     <div id="mainpart">
 	<div id="chat_area" align="center">
 		<div class="msg_container" align="center">
-			<span class="msg_text msg_title" chat_id="-1" position="center" align="center">
+			{% if full %}
+			<span class="msg_text msg_title" start_talk="1" position="center" align="center">
 				已連線，請開始聊天...
 			</span>
-		</div>
-		<div class="msg_container" align="left">
-			<img class="head" src="{{ url_for('static', filename='images/sample1.jpg') }}">
-			<span class="msg_text" chat_id="23456" position="left" align="left">
-				安安～
+			{% else %}
+			<span class="msg_text msg_title" start_talk="0" position="center" align="center">
+				將為您配對好友，請等候...
 			</span>
+			{% endif %}
 		</div>
-		<div class="msg_container" align="right">
-			<span class="msg_text" chat_id="23457" position="right" align="left">
-				你好～
-			</span>
-		</div>
-		
-		<div class="msg_container" align="left">
-			<img class="head" src="{{ url_for('static', filename='images/sample1.jpg') }}">
-			<span class="msg_text" chat_id="23460" position="left" align="left">
-				很高興認識你
-			</span>
-		</div>
-		
 	</div>
 
 	<div id="input_msg_container" align="center">
