@@ -29,19 +29,16 @@ def login():
     if not chatroom:
         chatroom = Chatroom()
         db.session.add(chatroom)
+        user.join_room(chatroom.id)
         db.session.commit()
-    elif chatroom.full == False:
+    else:
         def get_id(x): return x.id
         room_users = map(get_id,chatroom.users)
-        if user.id in room_users:
-            chatroom = Chatroom()
-            db.session.add(chatroom)
+        print room_users
+        if user.id not in room_users:
+            user.join_room(chatroom.id)
+            chatroom.full = True
             db.session.commit()
-    else:
-        chatroom.full = True
-
-    user.join_room(chatroom.id)
-    db.session.commit()
 
     session.permanent = False
     session['id'] = user.id
