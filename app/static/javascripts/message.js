@@ -1,9 +1,8 @@
+var socket;
 var msg_controller = new function(){
 	var thisObj = this;
 	var room = '';
 	var sender_id;
-	var socket;
-	var start_talk;
 	//TODO: bind click event
 	return thisObj = {
 		init : function(){
@@ -13,7 +12,6 @@ var msg_controller = new function(){
 					showBar($(this));
 				});
 			});
-			start_talk = parseInt($(".msg_title").attr("start_talk"));
 		},
 		enterMessage : function(event){
 			if(event.keyCode == 13){
@@ -154,10 +152,6 @@ var msg_controller = new function(){
 			console.log(data);
 			if(data.sender != sender_id)
             	addMessage(data.chat_id,data.msg,"left",data.score);
-            if(start_talk == 0){
-            	start_talk = 1 ;
-            	$(".msg_title").text("已連線，請開始聊天...");
-            }
         });
 
         socket.on('update color', function(data) {
@@ -166,9 +160,9 @@ var msg_controller = new function(){
         		$(".msg_container[chat_id='" + data.chat_id + "'] .msg_text").css("color",setEmotion(data.score));
         	}
         });
-        
-		socket.on('start talk', function(data) {
-        	
+
+		socket.on('start chat', function(data) {
+            $(".msg_title").text("已連線，請開始聊天...");
         });
 	}
 };

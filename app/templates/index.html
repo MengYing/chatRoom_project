@@ -16,15 +16,9 @@
     <div id="mainpart">
 	<div id="chat_area" align="center">
 		<div class="msg_container" align="center">
-			{% if full %}
-			<span class="msg_text msg_title" start_talk="1" position="center" align="center">
-				已連線，請開始聊天...
-			</span>
-			{% else %}
 			<span class="msg_text msg_title" start_talk="0" position="center" align="center">
 				將為您配對好友，請等候...
 			</span>
-			{% endif %}
 		</div>
 	</div>
 
@@ -55,6 +49,9 @@
 	$(document).ready(function(){
 		console.log('ready');
 		msg_controller.init();
+		{% if full %}
+		setTimeout(function(){socket.emit("start chat",{room:$('#chat_header').attr("room_id")});}, 500);
+		{% endif %}
 		//window.scrollTo(0,document.body.scrollHeight);
 		//mainpart = document.getElementById('mainpart');
 		//mainpart.scrollTo(0, mainpart.scrollHeight);
