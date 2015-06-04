@@ -162,7 +162,19 @@ var msg_controller = new function(){
         });
 
 		socket.on('start chat', function(data) {
+			var name_list = data["name_hash"];
+			var name;
+			for(key in name_list){
+				if( key != sender_id)
+					name = name_list[key];
+			}
             $(".msg_title").text("已連線，請開始聊天...");
+            $("#friend_list .friend_text").text(name);
+        });
+
+        socket.on('quit room',function(data){
+        	console.log( sender_id + " quit!");
+        	$(".msg_title").text("對方已離開...QAQ");
         });
 	}
 };

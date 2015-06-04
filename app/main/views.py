@@ -93,9 +93,12 @@ def testpage():
 def index():
     u_id = session.get('id')
     room_id = session.get('chatroom_id')
-    full = Chatroom.query.get(session.get('chatroom_id')).full
-    print full
-    return render_template('index.html',u_id = u_id, room_id = room_id, full = full )
+    full = Chatroom.query.get(room_id).full
+    name_list = Chatroom.query.get(room_id).users
+    name_hash = {}
+    for i in name_list:
+        name_hash[i.id] = i.username
+    return render_template('index.html',u_id = u_id, room_id = room_id, full = full ,name_hash = name_hash)
 
 @main.route('/chat/<msg>', methods = ['GET','POST'])
 def chat(msg):
