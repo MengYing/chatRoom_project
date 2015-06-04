@@ -17,7 +17,11 @@
 	<div id="chat_area" align="center">
 		<div class="msg_container" align="center">
 			<span class="msg_text msg_title" start_talk="0" position="center" align="center">
+			{% if full %}
+				已連線，請開始聊天...
+			{% else %}
 				將為您配對好友，請等候...
+			{% endif %}	
 			</span>
 		</div>
 	</div>
@@ -35,7 +39,7 @@
 		<div class="floater"></div>
 		<img class="head" src="{{ url_for('static', filename='images/sample1.jpg') }}">
 		<span class="friend_text" align="left">
-			彤彤{{ userName }}
+			
 		</span>
 	</div>
 	
@@ -50,7 +54,9 @@
 		console.log('ready');
 		msg_controller.init();
 		{% if full %}
-		setTimeout(function(){socket.emit("start chat",{room:$('#chat_header').attr("room_id")});}, 500);
+		setTimeout(function(){
+			socket.emit("start chat",{room:$('#chat_header').attr("room_id"),name_hash:{{name_hash|tojson }} })
+		}, 500);
 		{% endif %}
 		//window.scrollTo(0,document.body.scrollHeight);
 		//mainpart = document.getElementById('mainpart');
