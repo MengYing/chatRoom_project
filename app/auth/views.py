@@ -75,6 +75,7 @@ def register():
     flash('You can now login.')
     return redirect(url_for('auth.login'))
 
+
 @auth.route('/testajax', methods=['GET', 'POST'])
 def testajax():
     return jsonify({"str":"hahahaha"})

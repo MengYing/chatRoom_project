@@ -16,6 +16,7 @@ var msg_controller = new function(){
 		enterMessage : function(event){
 			if(event.keyCode == 13){
 				var str = $("#input_msg").val();
+				
 				$.post("/chat/"+str, {room:room})
 					.done(function(data){
 						var direction = "right";
@@ -40,6 +41,8 @@ var msg_controller = new function(){
 			.fail(function(){
 				alert("update failed!");
 			});
+
+        
 		},
 		modifyMsgColor : function(){
 			//user modify the color => post to server
@@ -68,6 +71,7 @@ var msg_controller = new function(){
 		var div = '<div class="msg_container" align="' + direction + '" chat_id ="' + converse_id +'">';
 		var img = '<img src="static/images/sample1.jpg" class="head">';
 		var span = setMessageContent(direction,str,point);
+		///str
 		var color_bar = setColorBar(direction,converse_id);
 		if(direction == "left")
 			div = $(div).append(img).append(span);
@@ -81,31 +85,31 @@ var msg_controller = new function(){
 		return $(span).text(str).css("color",setEmotion(point));
 	}
 	function setEmotion(point){
-		var color_list = ["#FF2904","#FAF704","#000000","#64FAF5","#0F1EFA"];
+		var color_list = ["#33CC00","#000000","#CC0000","#CC33FF","#0033CC"];
 		var color;
 		point = parseFloat(point);
 		// console.log("point: " + point);
-		if(point >= 0.6)
+		if(point == 4.0)
 			color = color_list[0];
-		else if(point >= 0.2)
-			color = color_list[1];
-		else if(point >= -0.2)
+		else if(point == 3.0)
 			color = color_list[2];
-		else if(point >= -0.6)
+		else if(point == 2.0)
 			color = color_list[3];
-		else
+		else if(point == 1.0)
 			color = color_list[4];
+		else
+			color = color_list[1];
 
 		return color;
 	}
 	function setColorBar(direction,chat_id){
 		var block = '<div position="' + direction + '"></div>';
 		var span = '<span></span>'
-		var emotion = {"happy":0.7, "scared":0.4, "none":0.1, "mad":-0.4, "sad":-0.7};
+		var emotion = {"happy":4.0, "none":0.0, "anger":3.0, "sorry":2.0, "sadness":1.0};
 		
 		for(var key in emotion){
-			var onclick = "msg_controller.updateMsgColor('" + chat_id + "','" + emotion[key] + "')";
-			var tmp = $(span).text(key).css({"margin":"0px 10px","cursor":"pointer"}).attr("onclick",onclick);
+			var onclick = "msg_controller.updateMsgColor('" + chat_id + "','" + emotion[key] +"')";
+			var tmp = $(span).text(key).css({"margin":"0px 10px","cursor":"pointer"}).attr("onclick",onclick).attr("emotion",key);
 			block = $(block).append(tmp);
 		}
 
