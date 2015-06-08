@@ -1,3 +1,6 @@
+from gevent import monkey
+monkey.patch_all()
+
 from flask import *
 import random
 from datetime import datetime
@@ -10,9 +13,7 @@ import jieba
 from flask.ext.socketio import SocketIO, emit, join_room, leave_room, \
     close_room, disconnect
 
-# @main.route('/', methods=['GET', 'POST'])
-# def indextest():
-#     return redirect(url_for('auth.login'))
+
 
 @main.route('/label', methods=['GET'])
 def label():

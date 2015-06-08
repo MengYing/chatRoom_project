@@ -139,7 +139,7 @@ var msg_controller = new function(){
 		console.log("Start connecting to websocket");
 		u_id = $('#chat_header').attr("u_id");
 		room = $('#chat_header').attr("room_id");
-		socket = io.connect('http://127.0.0.1:5000/');
+		socket = io.connect('http://127.0.0.1:3000/');
 		socket.on('connect', function() {
             socket.emit('join room', {room: room, u_id:u_id});
         });

@@ -195,7 +195,7 @@ def setSentense(sentence):
         doc['dic'] = OkapiNormalize(doc['dic'])
         doc['dic'] = TFIDFWeighting(doc['dic'], idf)
 
-    # print sentence
+    print sentence
     words = jieba.cut(sentence, cut_all=False)
     qry = {}
     for word in words:
