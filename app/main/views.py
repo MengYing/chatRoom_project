@@ -7,7 +7,8 @@ from .. import db
 from ..models import User
 from ..util import *
 import jieba
-
+from flask.ext.socketio import SocketIO, emit, join_room, leave_room, \
+    close_room, disconnect
 
 # @main.route('/', methods=['GET', 'POST'])
 # def indextest():
@@ -104,17 +105,18 @@ def index():
 def chat(msg):
     u_id = session.get('id')
     room_id = request.form["room"]
-    record = ChatRecord(msg,u_id,room_id)
+    record = ChatRecord(msg, u_id, room_id)
     score = SentiDictionary.get_value(msg)
     # print "score: ", score
     db.session.add(record)
     db.session.commit()
     return jsonify({"success":True,"chat_id":record.id,"score":score})
 
-@main.route('/modify_value/<id>', methods = ['POST'])
+@main.route('/modify_value/<id>', methods=['POST'])
 def modify_value(id):
     id = int(id)
     val = float(request.form["score"])
     ChatRecord.update_value(id,val)
+    
     print ChatRecord.query.get(id).word
     return jsonify({"msg":"update success"})

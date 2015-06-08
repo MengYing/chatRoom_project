@@ -16,7 +16,7 @@ var msg_controller = new function(){
 		enterMessage : function(event){
 			if(event.keyCode == 13){
 				var str = $("#input_msg").val();
-				
+
 				$.post("/chat/"+str, {room:room})
 					.done(function(data){
 						var direction = "right";
