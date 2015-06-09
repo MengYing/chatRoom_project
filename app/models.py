@@ -4,7 +4,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask.ext.login import UserMixin
 from . import db, login_manager
 import jieba
-from datetime import datetime
+import datetime
+
+import time
 import unicodedata
 import json
 import math
@@ -61,10 +63,13 @@ class Chatroom(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     created_at = db.Column(db.DateTime)
     full = db.Column(db.Boolean)
+    timeStr = db.Column(db.String(256))
 
     def __init__(self):
-        self.created_at = datetime.utcnow()
+        self.created_at = "2015-06-09 12:03:28"
         self.full = False
+        self.timeStr = int(datetime.datetime.now().strftime("%s")) * 1000
+
 
 class ChatRecord(db.Model):
     __tablename__ = 'chat_records'
@@ -75,15 +80,18 @@ class ChatRecord(db.Model):
     sentimentalVal = db.Column(db.Float(10))
     retrained = db.Column(db.Boolean)   
     created_at = db.Column(db.DateTime)
+    timeStr = db.Column(db.String(256))
 
     def __init__(self, word, user_id, chatroom_id, retrained=True):
         self.chatroom_id = chatroom_id
         self.user_id = user_id
         self.word = word
-        self.sentimentalVal = SentiDictionary.get_value(word)
+        # self.sentimentalVal = SentiDictionary.get_value(word)
+        self.sentimentalVal = 0
         self.retrained = retrained
-        self.created_at = datetime.utcnow()
-
+        self.created_at = "2015-06-09 12:03:28"
+        self.timeStr = int(datetime.datetime.now().strftime("%s")) * 1000
+    
     def __repr__(self):
         return '<Share %r>' % self.word
 
@@ -92,8 +100,14 @@ class ChatRecord(db.Model):
         record = ChatRecord.query.get(record_id)
         record.sentimentalVal = new_value
         record.retrained = False
-        db.session.commit()
 
+        db.session.commit()
+    @staticmethod
+    def update_score(record_id, new_value):
+        record = ChatRecord.query.get(record_id)
+        record.sentimentalVal = new_value
+        record.retrained = True
+        db.session.commit()
 
 class SentiDictionary(db.Model):
     __tablename__ = 'sentiDic'
@@ -224,7 +238,7 @@ def setSentense(sentence):
         if data['score'] >= 0.2:
             if data['tag'] in label:
                 label[data['tag']] += 1
-        # print str(ID)+'\t'+data['tag']+'\t'+str(data['score'])
+        print str(ID)+'\t'+data['tag']+'\t'+str(data['score'])
     sentiment = max(label, key = lambda x: label.get(x))
     if sentiment == 'none':
         return 0.0

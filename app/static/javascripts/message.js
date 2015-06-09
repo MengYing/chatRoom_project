@@ -15,8 +15,46 @@ var msg_controller = new function(){
 		},
 		enterMessage : function(event){
 			if(event.keyCode == 13){
+				
 				var str = $("#input_msg").val();
+                $.post("/chat2/"+str, {room:room})
+					.done(function(data){
+						var direction = "right";
+						var chat_id = data.chat_id;
+						var score = data.score;
+						var time = data.timeStamp;
+                        console.log("come on");
+						console.log('i',time);
+						//alert("3454566");
+						addMessage(chat_id,str,direction,score);
+						$("#input_msg").val("");
+						//send msg to other one
+						socket.emit("set msg",{sender: sender_id, room:room, chat_id:chat_id, msg:str, score:score});
+					    //alert("1233");
+					    //alert(time.toSting());
+					    $.post("/calculateScore/"+str+"/"+time, {room:room})
+						    .done(function(data){
+							    //alert("hihi");
+							    var direction = "right";
+							    var chat_id = data.chat_id;
+							    var score = data.score;
+							    //addMessage(chat_id,str,direction,score);
+							    $(".msg_container[chat_id='"+chat_id+"']").children(".msg_text").css("color",setEmotion(score));
+						        socket.emit("update color",{sender: sender_id, room:room, chat_id:parseInt(chat_id), score:score});
+					        })
+						    .fail(function(){
+							    alert('fail to submit the calculateScore!');
+						    });
+					
 
+
+					})
+					.fail(function(){
+						alert('fail to submit the message2!');
+					});
+				
+				
+				/*
 				$.post("/chat/"+str, {room:room})
 					.done(function(data){
 						var direction = "right";
@@ -30,13 +68,16 @@ var msg_controller = new function(){
 					.fail(function(){
 						alert('fail to submit the message!');
 					});
+*/
 			}
 		},
 		updateMsgColor : function(chat_id,score){
 			$.post("/modify_value/" + chat_id, {score:score})
 			.done(function(data){
+				console.log("updateMsgColor111");
 				$(".msg_container[chat_id='"+chat_id+"']").children(".msg_text").css("color",setEmotion(score));
 				socket.emit("update color",{sender: sender_id, room:room, chat_id:parseInt(chat_id), score:score});
+			    
 			})
 			.fail(function(){
 				alert("update failed!");
@@ -47,6 +88,25 @@ var msg_controller = new function(){
 		modifyMsgColor : function(){
 			//user modify the color => post to server
 			$.post();
+		},
+		calculateScore : function(event){
+			var str = $("#input_msg").val();
+			if(event.keyCode == 13){
+		        $.post("/calculateScore/"+str, {room:room})
+				.done(function(data){
+					var direction = "right";
+					var chat_id = data.chat_id;
+					var score = data.score;
+					//addMessage(chat_id,str,direction,score);
+					$(".msg_container[chat_id='"+chat_id+"']").children(".msg_text").css("color",setEmotion(score));
+				    socket.emit("update color",{sender: sender_id, room:room, chat_id:parseInt(chat_id), score:score});
+			    })
+				.fail(function(){
+					alert('fail to submit the message2!');
+				});		
+
+		    }
+			
 		}
 	};
 

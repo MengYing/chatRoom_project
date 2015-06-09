@@ -12,7 +12,8 @@ from ..util import *
 import jieba
 from flask.ext.socketio import SocketIO, emit, join_room, leave_room, \
     close_room, disconnect
-
+from time import time
+import datetime
 
 
 @main.route('/label', methods=['GET'])
@@ -102,16 +103,55 @@ def index():
         name_hash[i.id] = i.username
     return render_template('index.html',u_id = u_id, room_id = room_id, full = full ,name_hash = name_hash)
 
-@main.route('/chat/<msg>', methods = ['GET','POST'])
-def chat(msg):
+@main.route('/chat2/<msg>', methods = ['GET','POST'])
+def chat2(msg):
     u_id = session.get('id')
     room_id = request.form["room"]
     record = ChatRecord(msg, u_id, room_id)
-    score = SentiDictionary.get_value(msg)
+    # score = SentiDictionary.get_value(msg)
     # print "score: ", score
     db.session.add(record)
     db.session.commit()
+    time=ChatRecord.query.filter_by(id=record.id, chatroom_id=room_id, user_id=u_id, word=msg).first()
+    print "chat2", record.id, time.created_at, time.timeStr
+    print "user_id:",u_id,"chatroom_id", room_id
+    # temp = ''
+    # temp = str(time.created_at)
+    # print "type of temp:", type(temp)
+    # d = datetime.datetime.strptime(temp, '%Y-%m-%d %H:%M:%S')
+    # d =int(datetime.datetime.now().strftime("%s")) * 1000 
+    # time_second = time.mktime(d.timetuple()) + 1e-6 * d.microsecond
+    # print d
+    return jsonify({"success":True,"chat_id":record.id,"score":0,"timeStamp":time.timeStr})
+
+
+
+@main.route('/calculateScore/<msg>/<time>', methods = ['GET','POST'])
+def calculateScore(msg, time):
+    print "here!!",time
+    u_id = session.get('id')
+    room_id = request.form["room"]
+    #User.query.filter_by(username='peter').first()
+    record = ChatRecord.query.filter_by(chatroom_id=room_id, user_id=u_id, word=msg, timeStr=time).first()
+    # record = db.session.query(ChatRecord).filter_by(chatroom_id=room_id,user_).first();
+    # record = ChatRecord.query.get(id).filter_by(chatroom_id=room_id, user_id=u_id)
+    print u_id,room_id,record.id
+    #record = ChatRecord(msg, u_id, room_id)
+    score = SentiDictionary.get_value(msg)
+    ChatRecord.update_score(record.id,score)
+    print "calculateScore"
+    print "score: ", score
+    # db.session.add(record)
+    # db.session.commit()
     return jsonify({"success":True,"chat_id":record.id,"score":score})
+
+
+    # id = int(id)
+    # val = float(request.form["score"])
+    # ChatRecord.update_value(id,val)
+    
+    # print ChatRecord.query.get(id).word
+    # return jsonify({"msg":"update success"})
 
 @main.route('/modify_value/<id>', methods=['POST'])
 def modify_value(id):
