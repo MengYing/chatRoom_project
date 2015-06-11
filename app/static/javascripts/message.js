@@ -168,9 +168,18 @@ var msg_controller = new function(){
 		var span = '<span></span>'
 		var emotion = {"happy":4.0, "none":0.0, "anger":3.0, "sorry":2.0, "sadness":1.0};
 		
+		function emocolor(key){
+			if(key=="happy") return "#33CC00";
+			if(key=="none") return "#000000";
+			if(key=="anger") return "#CC0000";
+			if(key=="sorry") return "#CC33FF";
+			if(key=="sadness") return "#0033CC";
+			return "#FF0000";
+		}
+		
 		for(var key in emotion){
 			var onclick = "msg_controller.updateMsgColor('" + chat_id + "','" + emotion[key] +"')";
-			var tmp = $(span).text(key).css({"margin":"0px 10px","cursor":"pointer"}).attr("onclick",onclick).attr("emotion",key);
+			var tmp = $(span).text(key).css({"margin":"0px 10px","cursor":"pointer","color":emocolor(key)}).attr("onclick",onclick).attr("emotion",key);
 			block = $(block).append(tmp);
 		}
 
