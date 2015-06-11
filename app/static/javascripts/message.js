@@ -121,6 +121,7 @@ var msg_controller = new function(){
 		var color = getColor(point);
 		var output = getMessageDiv(str,color,direction,converse_id,point);
 		$('#chat_area').append(output);
+        $('#chat_area').scrollTop(output.position().top);
 		$('.msg_container[chat_id="' + converse_id + '"]').children(".msg_text").bind("click",function(){
 			showBar($(this));
 		});
