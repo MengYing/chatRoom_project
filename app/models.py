@@ -10,6 +10,10 @@ import time
 import unicodedata
 import json
 import math
+import urllib
+
+import ECpredictor as preD
+import ECtools as tool
 
 user_chatroom = db.Table('user_chatrooms',
         db.Column('user_id', db.Integer, db.ForeignKey('users.id')),
@@ -17,7 +21,13 @@ user_chatroom = db.Table('user_chatrooms',
     )
 
 
-
+para = [0.3, 0.2, 0.2, 0.3, 0.15, 0.15, 0.35, 0.35]    #[C, SC, CX, N, D, P, I, A]
+PD = 0.5
+S = 0.1
+R = 0.1
+P1 = [0, 0, 0, 0]
+P2 = [0, 0, 0, 0]
+labels = [0, 0, 0, 0, 0, 0]
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -109,6 +119,7 @@ class ChatRecord(db.Model):
         record.retrained = True
         db.session.commit()
 
+
 class SentiDictionary(db.Model):
     __tablename__ = 'sentiDic'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -117,44 +128,101 @@ class SentiDictionary(db.Model):
 
     @staticmethod
     def get_value(stringParam):
-        # value = 0.0
-        # words = jieba.cut(stringParam, cut_all=False)
-        # for word in words:
-        #     if word != '\n':
-        #         result = db.session.query(SentiDictionary.value).filter_by(words=word).first()
-        #         if (result):
-        #             value += result[0]
-        # print value
-        # return value
         return setSentense(stringParam)
 
+    @staticmethod
+    def get_dictionaryValue(stringParam):
+        return dictionaryBased(stringParam)
 
-def IDFWeighting(dic, totalNumber):
-    for vocabKey, cnt in dic.items():
-        cnt = math.log(totalNumber/cnt)
-    return dic
+    @staticmethod
+    def feedback_brian(stringParam, label):
+        feedbackToBrian(stringParam, label)
+
+    @staticmethod
+    def feedback_adjuster(label):
+        adjuster(label)
+        
+
+# ########### Brian ###########
 
 
-def TFIDFWeighting(vec, idf):
-    for vocabKey, vocCnt in vec.items():
-        if vocabKey in idf:
-            vocCnt = vocCnt * idf[vocabKey]
-    return vec
+def checkStrangeSentence(qry):
+    # check if sentence is strange sentence
+    strangeProportion = 2./3
+    wordNumInQry = float(sum(qry.values()))
+    wordIG = {}
+    with open('./app/wordList') as wordList:
+        for i in wordList:
+            wordIG = json.loads(i)
+    notInWdList = 0.
+    for word in qry:
+        if word not in wordIG:
+            notInWdList += 1
+    if notInWdList/wordNumInQry > strangeProportion: return True
+    else: return False
 
 
-def OkapiNormalize(vec):
-    b = 0.75
-    k = 2
-    avgDocLen = 1378
-    docLen = 0
-    for i in vec:
-        docLen += vec[i]
-    for i in vec:
-        vec[i] = (1+k)*vec[i]/(vec[i]+k*(1-b+b*docLen/avgDocLen))
-    return vec
+def googleSearchMethod(sentence):
+    #using google search service
+    emotions = ['開心', '難過', '生氣', '抱歉']
+    googleList =[]
+    for i in range(5): googleList.append(0.)
+    sentence = sentence.encode('utf-8')
+    totalCount = 0.
+    for emotion in emotions:
+        qrySentence = sentence+' '+emotion
+        query = urllib.urlencode({'q': qrySentence})
+        url = 'http://ajax.googleapis.com/ajax/services/search/web?v=1.0&%s' % query
+        search_response = urllib.urlopen(url)
+        search_results = search_response.read()
+        results = json.loads(search_results)
+        data = results['responseData']
+        count = int(str(data['cursor']['resultCount']).replace(',', ''))
+        if emotion == '開心': googleList[4] = count
+        elif emotion == '難過': googleList[1] = count
+        elif emotion == '生氣': googleList[3] = count
+        elif emotion == '抱歉': googleList[2] = count
+        totalCount += count
+    for i in range(5):
+        print i
+        googleList[i] = googleList[i]/totalCount
+    googleList[0] = .3
+    
+    temp = 0.0
+    for i in range(5):
+        temp += googleList[i]
+
+    for i in range(5):
+        googleList[i] /= temp
+
+    return googleList
+
+
+def informationGainWeight(qry):
+    #given a k times weight by information gain
+    #parameter
+    k = 1.5
+    wordIG = {}
+    with open('./app/wordList') as wordList:
+        for i in wordList:
+            wordIG = json.loads(i)
+# wordIG  100052
+# >0.00001 99621
+# >0.0001  14033
+# >0.001   932
+# >0.01    60
+# >0.1     2
+    featureSelect = []
+    for word in wordIG:
+        if wordIG[word] > 0.001:
+            featureSelect.append(word)
+    for word in qry:
+        qry[word] = qry[word]*k
+    return qry
 
 
 def cosineSimilarity(qry, dic):
+    # similarity between 2 vectors
     qryDis = 0.
     dicDis = 0.
     vecDot = 0.
@@ -171,11 +239,19 @@ def cosineSimilarity(qry, dic):
             vecDot += Cnt * dic[VocabKey]
     return vecDot/(qryDis*dicDis)
 
-
 def clearStopWord(dic):
+    # clear stopwords and symbol
     stopWord = [u'一',u'不',u'之',u'也',u'了',u'了',u'人',u'他',u'你',
-                    u'個',u'們',u'在',u'就',u'我',u'是',u'有',u'的',u'而',
-                    u'要',u'說',u'這',u'都',u' ']
+                u'個',u'們',u'在',u'就',u'我',u'是',u'有',u'的',u'而',
+                u'要',u'說',u'這',u'都',u' ',
+                u'~', u'!', u'.', u'(', u')', u':', u'～', u'?', u'_', u'=',u'＝',
+                u'\"',u'．',u'。',u'-','...',
+                u'\u3002', u'\uff1f', u'\uff01', u'\uff0c', u'\u3001',
+                u'\uff1b', u'\uff1a', u'\u300c', u'\u300d', u'\u300e', u'\u300f',
+                u'\u2018', u'\u2019', u'\u201c', u'\u201d', u'\uff08', u'\uff09',
+                u'\u3014', u'\u3015', u'\u3010', u'\u3011', u'\u2014', u'\u2026',
+                u'\u2013', u'\uff0e', u'\u300a', u'\u300b', u'\u3008', u'\u3009'
+                ]
     noStop = {}
     for i in dic:
         if i not in stopWord:
@@ -184,30 +260,11 @@ def clearStopWord(dic):
 
 
 def setSentense(sentence):  
-    stopWord = [u'一',u'不',u'之',u'也',u'了',u'了',u'人',u'他',u'你',
-                    u'個',u'們',u'在',u'就',u'我',u'是',u'有',u'的',u'而',
-                    u'要',u'說',u'這',u'都',u' ']
     corpusDic = []
-    with open('./app/Corpus.json','r') as corpus:
+    with open('./app/Corpus.json') as corpus:
         #key = tag, ID, dic
         for line in corpus:
             corpusDic.append(json.loads(line))
-    #print len(corpusDic)
-    numDoc = 18939.
-    idf = {}
-    for doc in corpusDic:
-        for i in doc['dic']:
-            if i in stopWord:
-                continue
-            if i not in idf:
-                idf[i] = doc['dic'][i]
-            else:
-                idf[i] += doc['dic'][i]
-    idf = IDFWeighting(idf, numDoc)
-
-    for doc in corpusDic:
-        doc['dic'] = OkapiNormalize(doc['dic'])
-        doc['dic'] = TFIDFWeighting(doc['dic'], idf)
 
     print sentence
     words = jieba.cut(sentence, cut_all=False)
@@ -217,40 +274,106 @@ def setSentense(sentence):
             qry[word] = 1
         else:
             qry[word] += 1
+    
+    
     qry = clearStopWord(qry)
-    qry = OkapiNormalize(qry)
-    qry = TFIDFWeighting(qry, idf)
-    rank={}
-    for doc in corpusDic:
-        score = cosineSimilarity(qry, doc['dic'])
-        ID = doc['ID']
-        tag = doc['tag']
-        rank[ID] = {'tag':tag, 'score':score}
-        if len(rank) > 10 :
-            rank.pop(min(rank, key = lambda x: rank.get(x).get('score')))
+# True: strange sentence so we use google search for clearifying 
+    if checkStrangeSentence(qry):
+        #print "GoogleSearch Method..."
+        googleList = googleSearchMethod(sentence)
+        return googleList
+# False: Retrieve method    
+    else:
+        #print "Retrieve Method..."
+        qry = informationGainWeight(qry)
+        rank={}
+        for doc in corpusDic:
+            score = cosineSimilarity(qry, doc['dic'])
+            ID = doc['ID']
+            tag = doc['tag']
+            rank[ID] = {'tag':tag, 'score':score}
+            if len(rank) > 10 :
+                rank.pop(min(rank, key = lambda x: rank.get(x).get('score')))
 
-    label = {'happy':0, 'lucky':0, 'hate':0, 'sad':0,'sorry':0,'none':1}
-    #none = 0, sad = 1, sorry = 2, angry = 3, happy,lucky = 4
+        retrieveList = []
+        for i in range(5): retrieveList.append(0.)
+        retrieveList[0] = 1.2
+        #none = 0, sad = 1, sorry = 2, angry = 3, happy = 4
+        num = 1
+        for i in range(10):
+            ID = max(rank, key = lambda x: rank.get(x).get('score'))
+            data = rank.pop(ID)
+            if data['score'] >= 0.3:
+                retrieveList[data['tag']] += (1./num)
+            #print str(ID)+'\t'+str(data['tag'])+'\t'+str(data['score'])
+            num += 1
+        temp = 0.0
+        for i in range(5):
+            temp += retrieveList[i]
 
-    for i in range(10):
-        ID = max(rank, key = lambda x: rank.get(x).get('score'))
-        data = rank.pop(ID)
-        if data['score'] >= 0.2:
-            if data['tag'] in label:
-                label[data['tag']] += 1
-        print str(ID)+'\t'+data['tag']+'\t'+str(data['score'])
-    sentiment = max(label, key = lambda x: label.get(x))
-    if sentiment == 'none':
-        return 0.0
-    elif sentiment == 'sad':
-        return 1.0
-    elif sentiment == 'sorry':
-        return 2.0
-    elif sentiment == 'hate':
-        return 3.0
-    elif sentiment == 'happy' or sentiment == 'lucky':
-        return 4.0
+        for i in range(5):
+            retrieveList[i] /= temp
 
+        return retrieveList
+
+# ########### Brian feedback #########
+
+
+def feedbackToBrian(sentence, label):
+    symbol = [u'~', u'!', u'.', u'(', u')', u':', u'～', u'?', u'_', u'=',u'＝',
+              u'\"',u'．',u'。',u'-',u'，',u' ',
+              u'\u3002', u'\uff1f', u'\uff01', u'\uff0c', u'\u3001',
+              u'\uff1b', u'\uff1a', u'\u300c', u'\u300d', u'\u300e', u'\u300f',
+              u'\u2018', u'\u2019', u'\u201c', u'\u201d', u'\uff08', u'\uff09',
+              u'\u3014', u'\u3015', u'\u3010', u'\u3011', u'\u2014', u'\u2026',
+              u'\u2013', u'\uff0e', u'\u300a', u'\u300b', u'\u3008', u'\u3009',
+              ]
+
+    docnum = 0
+    with open('./app/Corpus.json') as corpus:
+        corpusDic = []
+        for line in corpus:
+            corpusDic.append(json.loads(line))
+        docnum = len(corpusDic)
+    jsonFile = open('./app/feedback.json','a')
+    words = list(sentence)
+    denoise = []
+    for j in range(len(words)):
+        if words[j] not in symbol:
+            denoise.append(words[j])
+        elif len(denoise) > 0 and denoise[-1] != ' ':
+            denoise.append(' ')
+    sentence = ''.join(denoise)
+    words = jieba.cut(sentence, cut_all=False)
+    d = {}
+    for word in words:
+        if word not in d:
+            d[word] = 1
+        else:
+            d[word] += 1
+    print ' '.join(d)
+    dic = {'ID':docnum+1, 'dic':d, 'tag':label}
+    jsonFile.write(json.dumps(dic)+"\n")
+
+
+# ########### yatai ###########
+def adjuster(Finlabel):
+    global para, PD, R, P1, P2, S, labels
+    para = tool.adjuster(para, S, labels, Finlabel)
+    print para
+
+
+def dictionaryBased(sentense):
+    # ==== global parameters ====
+    print "dictionaryBased"
+    global para, PD, R, P1, P2, S, labels
+    getList = preD.taiMethod(sentense, para, PD, R, P1, P2)
+    emo = getList[:4]
+    labels = getList[4:]
+    P2 = P1[:]
+    P1 = emo[:]    # must to be changed the final prediction
+    
+    return tool.finalVec(emo, R)
 
 @login_manager.user_loader
 def load_user(user_id):

@@ -14,6 +14,9 @@ from flask.ext.socketio import SocketIO, emit, join_room, leave_room, \
     close_room, disconnect
 from time import time
 import datetime
+import app.ECnewer as newl
+
+scoreVectorPrevious = [0, 0, 0, 0]
 
 
 @main.route('/label', methods=['GET'])
@@ -128,22 +131,36 @@ def chat2(msg):
 
 @main.route('/calculateScore/<msg>/<time>', methods = ['GET','POST'])
 def calculateScore(msg, time):
-    print "here!!",time
+    # previous score Vector
+    global scoreVectorPrevious
+    print "here time!!", time
     u_id = session.get('id')
     room_id = request.form["room"]
-    #User.query.filter_by(username='peter').first()
     record = ChatRecord.query.filter_by(chatroom_id=room_id, user_id=u_id, word=msg, timeStr=time).first()
-    # record = db.session.query(ChatRecord).filter_by(chatroom_id=room_id,user_).first();
-    # record = ChatRecord.query.get(id).filter_by(chatroom_id=room_id, user_id=u_id)
-    print u_id,room_id,record.id
-    #record = ChatRecord(msg, u_id, room_id)
-    score = SentiDictionary.get_value(msg)
+    print u_id, room_id, record.id
+    # record = ChatRecord(msg, u_id, room_id)
+    score_Brain = []
+    score_yai = []
+    score_Brain = SentiDictionary.get_value(msg)
+    print "score_Brain", score_Brain
+    score_yai = SentiDictionary.get_dictionaryValue(msg)
+    print "score_yai", score_yai
+    tempScore = [x+y for x, y in zip(score_yai, score_Brain)]
+    print "max(tempScore)", max(tempScore)
+    score = tempScore.index(max(tempScore))
+    print score
+    SentiDictionary.feedback_adjuster(score)
+    # here can calculate the vector and still return a score.
+    ##
+    ##
+    ##
+    
     ChatRecord.update_score(record.id,score)
     print "calculateScore"
     print "score: ", score
     # db.session.add(record)
     # db.session.commit()
-    return jsonify({"success":True,"chat_id":record.id,"score":score})
+    return jsonify({"success":True, "chat_id":record.id, "score":score})
 
 
     # id = int(id)
@@ -156,8 +173,12 @@ def calculateScore(msg, time):
 @main.route('/modify_value/<id>', methods=['POST'])
 def modify_value(id):
     id = int(id)
-    val = float(request.form["score"])
-    ChatRecord.update_value(id,val)
-    
-    print ChatRecord.query.get(id).word
-    return jsonify({"msg":"update success"})
+    val = int(request.form["score"])
+    ChatRecord.update_value(id, val)
+    sentenceTemp = ChatRecord.query.get(id).word
+    print "sentenceTemp:", sentenceTemp, val
+    SentiDictionary.feedback_brian(sentenceTemp, val)
+    if(val != 0):
+        newl.newLearn(sentenceTemp, val)
+    # print ChatRecord.query.get(id).word
+    return jsonify({"msg": "update success"})

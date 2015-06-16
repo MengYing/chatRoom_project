@@ -7,6 +7,7 @@ from flask.ext.socketio import SocketIO, emit, join_room, leave_room, \
 from flask import request
 import time
 from threading import Thread
+
 app = create_app(os.getenv('FLASK_CONFIG') or 'default')
 # manager = Manager(app)
 # manager.add_command('runserver', Server(host='0.0.0.0', port=3000))
@@ -73,4 +74,5 @@ def test_disconnect():
 
 if __name__ == '__main__':
     # manager.run()
+
     socketio.run(app, host='0.0.0.0', port=3000)
